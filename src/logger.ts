@@ -1,5 +1,5 @@
 import axios from "axios";
-import { client } from "./subscriber";
+import client from "./archiver";
 import { WEBHOOK_URL, MQTT_TOPIC } from "./config";
 import * as os from "os";
 import * as fs from "fs";
@@ -15,10 +15,10 @@ export function formatDate(date: Date) {
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
 
-export function logger(file: string = "log") {
+export function logger(file: string = ".logs") {
   return function (topic: string, ...params: any[]) {
     const date = new Date();
-    const path = `./.logs/${file}/${date.getFullYear()}-${date.getMonth() + 1}`;
+    const path = `./${file}/${date.getFullYear()}-${date.getMonth() + 1}`;
     const now = `${date.getHours()}-${date.getMinutes()}-${date.getSeconds()}-${date.getMilliseconds()}`;
     if (!fs.existsSync(path)) {
       fs.mkdirSync(path, { recursive: true });

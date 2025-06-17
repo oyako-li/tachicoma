@@ -25,7 +25,6 @@ program
 
 program.parse();
 const options: any = program.opts();
-let context = "";
 
 if (options.clear) {
   clearHistory();
@@ -38,7 +37,6 @@ const messages = [
   ...history,
 ];
 
-history.push({ role: "user", content: options.prompt });
 
 if (options.mode === "agent") {
   const agent = new Agent(options.model, options.system, messages, [

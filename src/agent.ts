@@ -66,7 +66,6 @@ export class Agent {
               content: JSON.stringify(result),
             };
             console.log(`[tool:${toolName}]`, result);
-            // Add the function response to messages for the model to use
             this.messages.push(part.message);
             this.messages.push(toolMessage);
           }
