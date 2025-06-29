@@ -4,22 +4,33 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "ts-node src/server.ts",
+    "dev": "ts-node src/server.ts",
+    "build": "tsc"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/express": "^5.0.3",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   },
   "dependencies": {
+    "@apache-arrow/ts": "^20.0.0",
+    "@lancedb/lancedb": "0.20.1-beta.2",
+    "@types/socket.io": "^3.0.2",
+    "apache-arrow": "^20.0.0",
     "axios": "^1.9.0",
     "cheerio": "^1.0.0",
     "commander": "^14.0.0",
     "dotenv": "^16.5.0",
+    "express": "^5.1.0",
     "googleapis": "^150.0.1",
+    "marked": "^16.0.0",
     "mqtt": "^5.13.1",
-    "ollama": "^0.5.16"
+    "ollama": "^0.5.16",
+    "socket.io": "^4.8.1"
   }
 }

@@ -6,3 +6,4 @@ release
 .env
 *.sh
 !.gitkeep
+.lancedb

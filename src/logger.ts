@@ -4,6 +4,7 @@ import { WEBHOOK_URL, MQTT_TOPIC } from "./config";
 import * as os from "os";
 import * as fs from "fs";
 
+
 export function formatDate(date: Date) {
   let year = date.getFullYear();
   let month = (date.getMonth() + 1).toString().padStart(2, "0");
@@ -65,6 +66,23 @@ export function publishLog(level?: string) {
       `${MQTT_TOPIC}/${os.hostname()}/${level}`,
       `${now}, ${Array.from(arguments).join(", ")}`
     );
+  };
+}
+
+export function jsonlLogger(file: string = ".logs") {
+  return function (topic: string, payload: any) {
+    const date = new Date();
+    const path = `./${file}/${date.getFullYear()}-${date.getMonth() + 1}`;
+    if (!fs.existsSync(path)) {
+      fs.mkdirSync(path, { recursive: true });
+    }
+    const logPath = `${path}/${date.getDate()}.jsonl`;
+    const logEntry = {
+      timestamp: date.toISOString(),
+      topic,
+      payload: payload.toString(),
+    };
+    fs.appendFileSync(logPath, JSON.stringify(logEntry) + "\n");
   };
 }
 

@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MQTT メッセージ監視</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+        
+        .status {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #dc3545;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-indicator.connected {
+            background: #28a745;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .message-count {
+            font-weight: bold;
+            color: #495057;
+        }
+        
+        .chat-form {
+            background: #f8f9fa;
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .chat-form-row {
+            display: flex;
+            gap: 15px;
+            align-items: flex-end;
+            margin-bottom: 15px;
+        }
+        
+        .form-group {
+            flex: 1;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            color: #495057;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 0.9em;
+            box-sizing: border-box;
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 60px;
+            font-family: inherit;
+        }
+        
+        .send-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: bold;
+            transition: background 0.3s ease;
+            white-space: nowrap;
+        }
+        
+        .send-btn:hover {
+            background: #0056b3;
+        }
+        
+        .send-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        .quick-topics {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .quick-topic-btn {
+            background: #e9ecef;
+            color: #495057;
+            border: 1px solid #ced4da;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8em;
+            transition: all 0.3s ease;
+        }
+        
+        .quick-topic-btn:hover {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+        
+        .chat-container {
+            height: 500px;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        
+        .chat-message {
+            margin-bottom: 20px;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        .chat-message.new-message {
+            animation: highlightMessage 2s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes highlightMessage {
+            0% { background: #d4edda; }
+            100% { background: transparent; }
+        }
+        
+        .message-bubble {
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+        
+        .message-bubble.own-message {
+            background: #007bff;
+            color: white;
+            margin-left: auto;
+        }
+        
+        .message-bubble.system-message {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .message-content {
+            font-size: 1em;
+            line-height: 1.4;
+            margin-bottom: 8px;
+        }
+        
+        /* Markdownスタイル */
+        .message-content h1,
+        .message-content h2,
+        .message-content h3,
+        .message-content h4,
+        .message-content h5,
+        .message-content h6 {
+            margin: 10px 0 5px 0;
+            font-weight: bold;
+        }
+        
+        .message-content h1 { font-size: 1.5em; }
+        .message-content h2 { font-size: 1.3em; }
+        .message-content h3 { font-size: 1.1em; }
+        
+        .message-content p {
+            margin: 8px 0;
+        }
+        
+        .message-content ul,
+        .message-content ol {
+            margin: 8px 0;
+            padding-left: 20px;
+        }
+        
+        .message-content li {
+            margin: 4px 0;
+        }
+        
+        .message-content code {
+            background: rgba(0,0,0,0.1);
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        
+        .message-content pre {
+            background: rgba(0,0,0,0.1);
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        
+        .message-content pre code {
+            background: none;
+            padding: 0;
+        }
+        
+        .message-content blockquote {
+            border-left: 4px solid #007bff;
+            margin: 10px 0;
+            padding-left: 15px;
+            color: #6c757d;
+        }
+        
+        .message-content table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 10px 0;
+        }
+        
+        .message-content th,
+        .message-content td {
+            border: 1px solid #dee2e6;
+            padding: 8px;
+            text-align: left;
+        }
+        
+        .message-content th {
+            background: rgba(0,0,0,0.1);
+            font-weight: bold;
+        }
+        
+        .message-content a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        
+        .message-content a:hover {
+            text-decoration: underline;
+        }
+        
+        .message-content strong {
+            font-weight: bold;
+        }
+        
+        .message-content em {
+            font-style: italic;
+        }
+        
+        /* 自分のメッセージ用のMarkdownスタイル */
+        .message-bubble.own-message .message-content code {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .message-bubble.own-message .message-content pre {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .message-bubble.own-message .message-content blockquote {
+            border-left-color: rgba(255,255,255,0.5);
+            color: rgba(255,255,255,0.8);
+        }
+        
+        .message-bubble.own-message .message-content a {
+            color: rgba(255,255,255,0.9);
+        }
+        
+        .message-bubble.own-message .message-content th {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        /* システムメッセージ用のMarkdownスタイル */
+        .message-bubble.system-message .message-content code {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .message-bubble.system-message .message-content pre {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .message-bubble.system-message .message-content blockquote {
+            border-left-color: rgba(255,255,255,0.5);
+            color: rgba(255,255,255,0.8);
+        }
+        
+        .message-bubble.system-message .message-content a {
+            color: rgba(255,255,255,0.9);
+        }
+        
+        .message-bubble.system-message .message-content th {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .message-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.75em;
+            color: #6c757d;
+            margin-top: 8px;
+        }
+        
+        .message-bubble.own-message .message-meta {
+            color: rgba(255,255,255,0.8);
+        }
+        
+        .message-bubble.system-message .message-meta {
+            color: rgba(255,255,255,0.8);
+        }
+        
+        .message-info {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .message-info span {
+            background: rgba(0,0,0,0.1);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.7em;
+        }
+        
+        .message-bubble.own-message .message-info span {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .message-bubble.system-message .message-info span {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .message-timestamp {
+            font-weight: bold;
+        }
+        
+        .topic-badge {
+            background: #e9ecef;
+            color: #495057;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.7em;
+            margin-bottom: 5px;
+            display: inline-block;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+            animation: slideInRight 0.5s ease-out;
+        }
+        
+        .notification.error {
+            background: #dc3545;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+        
+        .empty-state h3 {
+            margin-bottom: 10px;
+            color: #495057;
+        }
+        
+        .clear-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background 0.3s ease;
+        }
+        
+        .clear-btn:hover {
+            background: #c82333;
+        }
+        
+        .filter-controls {
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .filter-controls input,
+        .filter-controls select {
+            padding: 6px 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        
+        .filter-controls label {
+            font-weight: bold;
+            color: #495057;
+            font-size: 0.9em;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Archive Monitor</h1>
+        </div>
+        
+        <div class="status">
+            <div class="connection-status">
+                <div class="status-indicator" id="statusIndicator"></div>
+                <span id="statusText">接続中...</span>
+            </div>
+            <div class="message-count">
+                受信メッセージ: <span id="messageCount">0</span>
+            </div>
+            <button class="clear-btn" onclick="clearMessages()">クリア</button>
+        </div>
+        
+        <!-- 受信メッセージタブ -->
+        <div id="receiveTab" class="tab-content active">
+            <!-- チャット送信フォーム -->
+            <div class="chat-form">
+                <div class="chat-form-row">
+                    <div class="form-group">
+                        <label>トピック:</label>
+                        <input type="text" id="chatTopic" placeholder="例: a2a/test/chat" value="a2a/mikoto/chat">
+                    </div>
+                    <div class="form-group">
+                        <label>QoS:</label>
+                        <select id="chatQos">
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>エージェントID:</label>
+                        <input type="text" id="chatAgentId" placeholder="例: user123" value="user123">
+                    </div>
+                </div>
+                <div class="chat-form-row">
+                    <div class="form-group">
+                        <label>メッセージ:</label>
+                        <textarea id="chatMessage" placeholder="メッセージを入力してください..."></textarea>
+                    </div>
+                    <button class="send-btn" onclick="sendChatMessage()" id="sendChatBtn">送信</button>
+                </div>
+                <div class="quick-topics">
+                    <span>クイックトピック:</span>
+                    <button class="quick-topic-btn" onclick="setQuickTopic('a2a/mikoto/chat')">チャット</button>
+                    <button class="quick-topic-btn" onclick="setQuickTopic('a2a/mikoto/status')">ステータス</button>
+                    <button class="quick-topic-btn" onclick="setQuickTopic('a2a/mikoto/command')">コマンド</button>
+                    <button class="quick-topic-btn" onclick="setQuickTopic('a2a/mikoto/notification')">通知</button>
+                </div>
+            </div>
+            
+            <!-- フィルター -->
+            <div class="filter-controls">
+                <div>
+                    <label>エージェントID:</label>
+                    <input type="text" id="agentFilter" placeholder="フィルター..." onkeyup="filterMessages()">
+                </div>
+                <div>
+                    <label>ロール:</label>
+                    <select id="roleFilter" onchange="filterMessages()">
+                        <option value="">すべて</option>
+                    </select>
+                </div>
+                <div>
+                    <label>ステータス:</label>
+                    <select id="statusFilter" onchange="filterMessages()">
+                        <option value="">すべて</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- チャットメッセージ表示 -->
+            <div class="chat-container" id="chatContainer">
+                <div class="empty-state">
+                    <h3>メッセージを待機中...</h3>
+                    <p>MQTTメッセージが受信されると、ここに表示されます。</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- メッセージ送信タブ -->
+        <div id="sendTab" class="tab-content">
+            <div class="chat-form">
+                <div class="chat-form-row">
+                    <div class="form-group">
+                        <label>トピック:</label>
+                        <input type="text" id="sendTopic" placeholder="例: a2a/test/custom">
+                    </div>
+                    <div class="form-group">
+                        <label>QoS:</label>
+                        <select id="sendQos">
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="chat-form-row">
+                    <div class="form-group">
+                        <label>ペイロード:</label>
+                        <textarea id="sendPayload" placeholder="送信するデータを入力してください..."></textarea>
+                    </div>
+                    <button class="send-btn" onclick="sendCustomMessage()" id="sendCustomBtn">送信</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        SpeechRecognition = webkitSpeechRecognition || SpeechRecognition;
+        const socket = io();
+        let messageCount = 0;
+        let allMessages = [];
+        let currentAgentId = 'user123';
+        let shouldAutoScroll = true;
+        let userScrolled = false;
+        const recognition = new SpeechRecognition();
+        // Marked.jsの設定
+        marked.setOptions({
+            breaks: true,
+            gfm: true
+        });
+        
+        // 接続状態の管理
+        socket.on('connect', () => {
+            document.getElementById('statusIndicator').classList.add('connected');
+            document.getElementById('statusText').textContent = '接続済み';
+        });
+        
+        socket.on('disconnect', () => {
+            document.getElementById('statusIndicator').classList.remove('connected');
+            document.getElementById('statusText').textContent = '切断されました';
+        });
+        
+        // MQTTメッセージの受信
+        socket.on('mqtt-message', (data) => {
+            messageCount++;
+            document.getElementById('messageCount').textContent = messageCount;
+            
+            // プッシュ通知を表示
+            showNotification(`新しいメッセージを受信: ${data.agent_id || 'Unknown'}`);
+            
+            // メッセージを配列に追加
+            allMessages.unshift(data);
+            
+            // 最大1000件まで保持
+            if (allMessages.length > 1000) {
+                allMessages = allMessages.slice(0, 1000);
+            }
+            
+            // チャット表示を更新
+            updateChat();
+            
+            // フィルターオプションを更新
+            updateFilterOptions();
+        });
+        
+        // 送信成功/エラーの処理
+        socket.on('mqtt-send-success', (data) => {
+            showNotification(`メッセージ送信成功: ${data.topic}`, 'success');
+            document.getElementById('sendChatBtn').disabled = false;
+            document.getElementById('sendCustomBtn').disabled = false;
+        });
+        
+        socket.on('mqtt-send-error', (data) => {
+            showNotification(`送信エラー: ${data.error}`, 'error');
+            document.getElementById('sendChatBtn').disabled = false;
+            document.getElementById('sendCustomBtn').disabled = false;
+        });
+
+        recognition.onresult = (event) => {
+            document.getElementById('chatMessage').value = event.results[0][0].transcript;
+            sendChatMessage();
+        }
+        // recognition.onerror = (event) => {
+        //     showNotification(`認識エラー: ${event.error}`, 'error');
+        // }
+        recognition.onend = () => {
+            recognition.start();
+        }
+        
+        function sendChatMessage() {
+            const topic = document.getElementById('chatTopic').value.trim();
+            const message = document.getElementById('chatMessage').value.trim();
+            const qos = parseInt(document.getElementById('chatQos').value);
+            const agentId = document.getElementById('chatAgentId').value.trim();
+            
+            if (!topic || !message) {
+                showNotification('トピックとメッセージは必須です', 'error');
+                return;
+            }
+            
+            currentAgentId = agentId;
+            
+            // 送信ボタンを無効化
+            document.getElementById('sendChatBtn').disabled = true;
+            
+            // チャット形式のペイロードを作成
+            const payload = JSON.stringify({
+                agent_id: agentId,
+                message: message,
+                timestamp: new Date().toISOString(),
+                type: 'chat'
+            });
+            
+            // メッセージを送信
+            socket.emit('send-mqtt-message', {
+                topic: topic,
+                payload: payload,
+                qos: qos
+            });
+            
+            // メッセージフィールドをクリア
+            document.getElementById('chatMessage').value = '';
+            
+            // 自分のメッセージを送信した場合は自動スクロールを無効にする
+            // （送信したメッセージが受信されてから自動スクロールされる）
+            shouldAutoScroll = false;
+        }
+        
+        function sendCustomMessage() {
+            const topic = document.getElementById('sendTopic').value.trim();
+            const payload = document.getElementById('sendPayload').value.trim();
+            const qos = parseInt(document.getElementById('sendQos').value);
+            
+            if (!topic || !payload) {
+                showNotification('トピックとペイロードは必須です', 'error');
+                return;
+            }
+            
+            // 送信ボタンを無効化
+            document.getElementById('sendCustomBtn').disabled = true;
+            
+            // メッセージを送信
+            socket.emit('send-mqtt-message', {
+                topic: topic,
+                payload: payload,
+                qos: qos
+            });
+            // recognition.start();
+        }
+        
+        function setQuickTopic(topic) {
+            document.getElementById('chatTopic').value = topic;
+        }
+        
+        function updateChat() {
+            const container = document.getElementById('chatContainer');
+            
+            if (allMessages.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>メッセージを待機中...</h3>
+                        <p>MQTTメッセージが受信されると、ここに表示されます。</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const filteredMessages = filterMessagesData();
+            
+            let chatHTML = '';
+            
+            filteredMessages.forEach((data, index) => {
+                const timestamp = new Date(data.timestamp).toLocaleString('ja-JP');
+                const isOwnMessage = data.agent_id === currentAgentId;
+                const isSystemMessage = data.role === 'system' || data.status === 'system';
+                
+                // メッセージ内容を解析
+                let messageContent = data.payload;
+                let messageType = 'text';
+                
+                try {
+                    const parsed = JSON.parse(data.payload);
+                    if (parsed.message) {
+                        messageContent = parsed.message;
+                        messageType = parsed.type || 'chat';
+                    }
+                } catch (e) {
+                    // JSONでない場合はそのまま表示
+                }
+                
+                // MarkdownをHTMLに変換
+                let formattedContent = messageContent;
+                try {
+                    formattedContent = marked.parse(messageContent);
+                } catch (e) {
+                    // Markdown解析に失敗した場合はそのまま表示
+                    formattedContent = escapeHtml(messageContent);
+                }
+                
+                const messageClass = isOwnMessage ? 'own-message' : (isSystemMessage ? 'system-message' : '');
+                const isNewMessage = index === 0;
+                
+                chatHTML += `
+                    <div class="chat-message ${isNewMessage ? 'new-message' : ''}">
+                        <div class="topic-badge">${escapeHtml(data.topic)}</div>
+                        <div class="message-bubble ${messageClass}">
+                            <div class="message-content">${formattedContent}</div>
+                            <div class="message-meta">
+                                <div class="message-info">
+                                    <span class="message-timestamp">${timestamp}</span>
+                                    <span>ID: ${escapeHtml(data.agent_id || 'N/A')}</span>
+                                    <span>ロール: ${escapeHtml(data.role || 'N/A')}</span>
+                                    <span>ステータス: ${escapeHtml(data.status || 'N/A')}</span>
+                                    <span>フェーズ: ${escapeHtml(data.phase || 'N/A')}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = chatHTML;
+            
+            // 自動スクロールの条件をチェック
+            if (shouldAutoScroll && !userScrolled) {
+                // 最新メッセージまでスクロール
+                container.scrollTop = container.scrollHeight;
+            }
+        }
+        
+        function filterMessagesData() {
+            const agentFilter = document.getElementById('agentFilter').value.toLowerCase();
+            const roleFilter = document.getElementById('roleFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+            
+            return allMessages.filter(data => {
+                const agentMatch = !agentFilter || (data.agent_id && data.agent_id.toLowerCase().includes(agentFilter));
+                const roleMatch = !roleFilter || data.role === roleFilter;
+                const statusMatch = !statusFilter || data.status === statusFilter;
+                
+                return agentMatch && roleMatch && statusMatch;
+            });
+        }
+        
+        function filterMessages() {
+            updateChat();
+        }
+        
+        function updateFilterOptions() {
+            const roles = [...new Set(allMessages.map(m => m.role).filter(Boolean))];
+            const statuses = [...new Set(allMessages.map(m => m.status).filter(Boolean))];
+            
+            const roleSelect = document.getElementById('roleFilter');
+            const statusSelect = document.getElementById('statusFilter');
+            
+            // ロールフィルターを更新
+            const currentRole = roleSelect.value;
+            roleSelect.innerHTML = '<option value="">すべて</option>';
+            roles.forEach(role => {
+                const option = document.createElement('option');
+                option.value = role;
+                option.textContent = role;
+                if (role === currentRole) option.selected = true;
+                roleSelect.appendChild(option);
+            });
+            
+            // ステータスフィルターを更新
+            const currentStatus = statusSelect.value;
+            statusSelect.innerHTML = '<option value="">すべて</option>';
+            statuses.forEach(status => {
+                const option = document.createElement('option');
+                option.value = status;
+                option.textContent = status;
+                if (status === currentStatus) option.selected = true;
+                statusSelect.appendChild(option);
+            });
+        }
+        
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            // 3秒後に削除
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+        
+        function clearMessages() {
+            allMessages = [];
+            messageCount = 0;
+            document.getElementById('messageCount').textContent = '0';
+            shouldAutoScroll = true;
+            userScrolled = false;
+            updateChat();
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Enterキーでメッセージ送信
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('chatMessage').addEventListener('keydown', function(e) {
+                if (e.ctrlKey && e.key === 'Enter') {
+                    sendChatMessage();
+                }
+            });
+            
+            document.getElementById('sendPayload').addEventListener('keydown', function(e) {
+                if (e.ctrlKey && e.key === 'Enter') {
+                    sendCustomMessage();
+                }
+            });
+            
+            // チャットコンテナのスクロールイベントを監視
+            const chatContainer = document.getElementById('chatContainer');
+            chatContainer.addEventListener('scroll', function() {
+                const { scrollTop, scrollHeight, clientHeight } = this;
+                const isAtBottom = scrollTop + clientHeight >= scrollHeight - 10; // 10pxの余裕
+                
+                // ユーザーが手動でスクロールした場合
+                if (!isAtBottom) {
+                    userScrolled = true;
+                } else {
+                    // 最下部にいる場合は自動スクロールを有効にする
+                    userScrolled = false;
+                }
+            });
+
+            recognition.start();
+        });
+    </script>
+</body>
+</html> 

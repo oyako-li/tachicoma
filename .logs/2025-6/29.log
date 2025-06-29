@@ -1,0 +1,4 @@
+[4-50-41-494]:ERROR, MQTT接続エラー:, Error: Keepalive timeout
+[4-50-42-719]:INFO, MQTTサーバーに接続しました
+[4-50-42-719]:INFO, トピック a2a/mikoto/# を購読開始
+[9-59-12-343]:INFO, クライアントが接続しました:, E0y2-vPQ3RBzEM3KAAAP
