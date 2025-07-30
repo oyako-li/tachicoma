@@ -7,3 +7,5 @@ release
 *.sh
 !.gitkeep
 .lancedb
+password.txt
+/src/generated/prisma

@@ -19,7 +19,8 @@
   },
   "dependencies": {
     "@apache-arrow/ts": "^20.0.0",
-    "@lancedb/lancedb": "0.20.1-beta.2",
+    "@lancedb/lancedb": "^0.21.0",
+    "@prisma/client": "^6.10.1",
     "@types/socket.io": "^3.0.2",
     "apache-arrow": "^20.0.0",
     "axios": "^1.9.0",
@@ -31,6 +32,7 @@
     "marked": "^16.0.0",
     "mqtt": "^5.13.1",
     "ollama": "^0.5.16",
+    "prisma": "^6.10.1",
     "socket.io": "^4.8.1"
   }
 }

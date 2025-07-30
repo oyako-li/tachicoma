@@ -12,8 +12,11 @@ importers:
         specifier: ^20.0.0
         version: 20.0.0
       '@lancedb/lancedb':
-        specifier: 0.20.1-beta.2
-        version: 0.20.1-beta.2(apache-arrow@20.0.0)
+        specifier: ^0.21.0
+        version: 0.21.0(apache-arrow@20.0.0)
+      '@prisma/client':
+        specifier: ^6.10.1
+        version: 6.10.1(prisma@6.10.1(typescript@5.8.3))(typescript@5.8.3)
       '@types/socket.io':
         specifier: ^3.0.2
         version: 3.0.2
@@ -47,6 +50,9 @@ importers:
       ollama:
         specifier: ^0.5.16
         version: 0.5.16
+      prisma:
+        specifier: ^6.10.1
+        version: 6.10.1(typescript@5.8.3)
       socket.io:
         specifier: ^4.8.1
         version: 4.8.1
@@ -85,61 +91,91 @@ packages:
   '@jridgewell/trace-mapping@0.3.9':
     resolution: {integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==}
 
-  '@lancedb/lancedb-darwin-arm64@0.20.1-beta.2':
-    resolution: {integrity: sha512-yF0n/IEVwUCs924qURVAL7xDLddIwhgzmPZI89rGKyqPq3SeSMEDVUPDW1gVHuchkoENe3gVJb2lx8Un+3Ry9Q==}
+  '@lancedb/lancedb-darwin-arm64@0.21.0':
+    resolution: {integrity: sha512-6GYjI+xpWLWZTjgI/INpfYrB5yhqFTeOcUkx5PSXbze1Zlb72X67puLBrLgbpEuXiF+JdzXKcWuoCgY6Pzu/+Q==}
     engines: {node: '>= 18'}
     cpu: [arm64]
     os: [darwin]
 
-  '@lancedb/lancedb-darwin-x64@0.20.1-beta.2':
-    resolution: {integrity: sha512-QytfhaYxBrvWsFtUk+j+6e37u3dKo6VodBo3wliGuokPmCd9YJUqIV3z8pOAcUC+w02GTbLc6J/I+u9as26JmA==}
+  '@lancedb/lancedb-darwin-x64@0.21.0':
+    resolution: {integrity: sha512-QcmV4ByM5vhMEqxZO8x8Om8+nqE8q+asYzsHYxUMsIqY/LEeUEQxz+az6hv/tXOFY8QEcbGFu6qkh1N8Dz+Cuw==}
     engines: {node: '>= 18'}
     cpu: [x64]
     os: [darwin]
 
-  '@lancedb/lancedb-linux-arm64-gnu@0.20.1-beta.2':
-    resolution: {integrity: sha512-ojM4oIZ/r6wNCoOeoMVOqDJ6CzCynv1xvtY0MKIdmu5EujLJADFreV6oCoDNB10AqyeKp9mREGCTU1kDtk4y5A==}
+  '@lancedb/lancedb-linux-arm64-gnu@0.21.0':
+    resolution: {integrity: sha512-rcc8mj6X1udPriWS+ld/TL9J17328z0i6E9aoQL4cMQlVAAEhSWL32AiOcuMAr3aN4kkKs2d9vu7NdrLSVu0eQ==}
     engines: {node: '>= 18'}
     cpu: [arm64]
     os: [linux]
 
-  '@lancedb/lancedb-linux-arm64-musl@0.20.1-beta.2':
-    resolution: {integrity: sha512-9m43Zf1nBOoaMfJOH7J+WVJqicdSDvnIV1BbABtDwnuG/22Tgp/odGEcY+GIb7dpSujTQQvfhAQ5wD+MXIAjoA==}
+  '@lancedb/lancedb-linux-arm64-musl@0.21.0':
+    resolution: {integrity: sha512-bd//exR15UZL8icm3Yyn5HhO0rzfP32WmxZegP2LOLf7ij8cjDjBh/I8sBB0wpb26zj0tu6qTf9pIVqgpDdv1A==}
     engines: {node: '>= 18'}
     cpu: [arm64]
     os: [linux]
 
-  '@lancedb/lancedb-linux-x64-gnu@0.20.1-beta.2':
-    resolution: {integrity: sha512-LtjRKGv3Pwx7SRcvdXl2Wg0D2LR1gp7ddpJp6ME0t5N7fzDgBQab8eCvJxyZKyjB+trQ6Kgc8Kp2yYwKt6mQ8A==}
+  '@lancedb/lancedb-linux-x64-gnu@0.21.0':
+    resolution: {integrity: sha512-MQ9bkA2LvNnOUBiEskECkBR8lXUxA/koHayI+uHIqmy8r2YRRCbxoh3/AMCqf54th+/TiLlNw/zweAlkC137pQ==}
     engines: {node: '>= 18'}
     cpu: [x64]
     os: [linux]
 
-  '@lancedb/lancedb-linux-x64-musl@0.20.1-beta.2':
-    resolution: {integrity: sha512-G3FjaLkkYDGEggaHaKPx4J505+mP0RiZBnUYHrtAwHwNO/uKSR78pecgBZU6HCM3E+ui3BxOcWcnnHOucPAsTw==}
+  '@lancedb/lancedb-linux-x64-musl@0.21.0':
+    resolution: {integrity: sha512-G6k/Qi3qoeSR+n+Yj2txyhIYQficr+lHjVn/QDWWES2by1z7PVrCOnwLisK040WVNmh7PZx59jRSSoi/oGVeeA==}
     engines: {node: '>= 18'}
     cpu: [x64]
     os: [linux]
 
-  '@lancedb/lancedb-win32-arm64-msvc@0.20.1-beta.2':
-    resolution: {integrity: sha512-R0G6VCYQEJEf+Wn4xE/7AN56DOHjtzBYjM1TAwjAe1CA5D7KHdpJT7zERzVzRktcZg9nqk+2e2Opv1G/+buUFQ==}
+  '@lancedb/lancedb-win32-arm64-msvc@0.21.0':
+    resolution: {integrity: sha512-4CnGeZx1X4RS87VoCIXo8e0M3Lac9nnZc6WaDdSpj/1DX3c2qkKXYVG/RivXMDzHsazZnfYp86KM9m4ERMmk/w==}
     engines: {node: '>= 18'}
     cpu: [arm64]
     os: [win32]
 
-  '@lancedb/lancedb-win32-x64-msvc@0.20.1-beta.2':
-    resolution: {integrity: sha512-lClqM9hHwapQrOEHLVA2/9NCvxXxoBKVQnlJuhDjjRZZlrMKJ7sBXMtYfFGihly6fFm4FbR4O/RxKNFFAVTPbw==}
+  '@lancedb/lancedb-win32-x64-msvc@0.21.0':
+    resolution: {integrity: sha512-ufwhoKzpgLlkHAd6tXDcPdOTPMEt+gAPDQmyvM+kcw8Tpi5OTMv3dvnAn5l45rTl76AKlU+/+opUm3yzHT3aVQ==}
     engines: {node: '>= 18'}
     cpu: [x64]
     os: [win32]
 
-  '@lancedb/lancedb@0.20.1-beta.2':
-    resolution: {integrity: sha512-0Q8RzQEIfaP0ezlOCTEfbjJiIdxSq4PDnfpqo350JXjQ1SW+CNM+fZVbt9uHm6wTyxKtVxxpWVCMRRoo2nAjww==}
+  '@lancedb/lancedb@0.21.0':
+    resolution: {integrity: sha512-3c65DfAsTzGb3/Y2WtpJeqPFb2BgoTsYweg3gj9zP6t8CCaKQSeVWEGE8Nowtdj5Jkj9/nmHUoKPv4jCsds2yQ==}
     engines: {node: '>= 18'}
     cpu: [x64, arm64]
     os: [darwin, linux, win32]
     peerDependencies:
       apache-arrow: '>=15.0.0 <=18.1.0'
+
+  '@prisma/client@6.10.1':
+    resolution: {integrity: sha512-Re4pMlcUsQsUTAYMK7EJ4Bw2kg3WfZAAlr8GjORJaK4VOP6LxRQUQ1TuLnxcF42XqGkWQ36q5CQF1yVadANQ6w==}
+    engines: {node: '>=18.18'}
+    peerDependencies:
+      prisma: '*'
+      typescript: '>=5.1.0'
+    peerDependenciesMeta:
+      prisma:
+        optional: true
+      typescript:
+        optional: true
+
+  '@prisma/config@6.10.1':
+    resolution: {integrity: sha512-kz4/bnqrOrzWo8KzYguN0cden4CzLJJ+2VSpKtF8utHS3l1JS0Lhv6BLwpOX6X9yNreTbZQZwewb+/BMPDCIYQ==}
+
+  '@prisma/debug@6.10.1':
+    resolution: {integrity: sha512-k2YT53cWxv9OLjW4zSYTZ6Z7j0gPfCzcr2Mj99qsuvlxr8WAKSZ2NcSR0zLf/mP4oxnYG842IMj3utTgcd7CaA==}
+
+  '@prisma/engines-version@6.10.1-1.9b628578b3b7cae625e8c927178f15a170e74a9c':
+    resolution: {integrity: sha512-ZJFTsEqapiTYVzXya6TUKYDFnSWCNegfUiG5ik9fleQva5Sk3DNyyUi7X1+0ZxWFHwHDr6BZV5Vm+iwP+LlciA==}
+
+  '@prisma/engines@6.10.1':
+    resolution: {integrity: sha512-Q07P5rS2iPwk2IQr/rUQJ42tHjpPyFcbiH7PXZlV81Ryr9NYIgdxcUrwgVOWVm5T7ap02C0dNd1dpnNcSWig8A==}
+
+  '@prisma/fetch-engine@6.10.1':
+    resolution: {integrity: sha512-clmbG/Jgmrc/n6Y77QcBmAUlq9LrwI9Dbgy4pq5jeEARBpRCWJDJ7PWW1P8p0LfFU0i5fsyO7FqRzRB8mkdS4g==}
+
+  '@prisma/get-platform@6.10.1':
+    resolution: {integrity: sha512-4CY5ndKylcsce9Mv+VWp5obbR2/86SHOLVV053pwIkhVtT9C9A83yqiqI/5kJM9T1v1u1qco/bYjDKycmei9HA==}
 
   '@socket.io/component-emitter@3.1.2':
     resolution: {integrity: sha512-9BCxFwvbGg/RsZK9tjXd8s4UcwR0MWeFQ1XEKIQVVvAGJyINdrqKMcTRyLoK8Rse1GjzLV9cwjWV1olXRWEXVA==}
@@ -643,6 +679,10 @@ packages:
   is-promise@4.0.0:
     resolution: {integrity: sha512-hvpoI6korhJMnej285dSg6nu1+e6uxs7zG3BYAm5byqDsgJNWwxzM6z6iZiAgQR4TJ30JmBTOwqZUw3WlyH3AQ==}
 
+  jiti@2.4.2:
+    resolution: {integrity: sha512-rg9zJN+G4n2nfJl5MW3BMygZX56zKPNVEYYqq7adpmMh4Jn2QNEwhvQlFy6jPVdcod7txZtKHWnyZiA3a0zP7A==}
+    hasBin: true
+
   js-sdsl@4.3.0:
     resolution: {integrity: sha512-mifzlm2+5nZ+lEcLJMoBK0/IH/bDg8XnJfd/Wq6IP+xoCjLZsTOnV2QpxlVbX9bMnkl5PdEjNtBJ9Cj1NjifhQ==}
 
@@ -775,6 +815,16 @@ packages:
   path-to-regexp@8.2.0:
     resolution: {integrity: sha512-TdrF7fW9Rphjq4RjrW0Kp2AW0Ahwu9sRGTkS6bvDi0SCwZlEZYmcfDbEsTz8RVk0EHIS/Vd1bv3JhG+1xZuAyQ==}
     engines: {node: '>=16'}
+
+  prisma@6.10.1:
+    resolution: {integrity: sha512-khhlC/G49E4+uyA3T3H5PRBut486HD2bDqE2+rvkU0pwk9IAqGFacLFUyIx9Uw+W2eCtf6XGwsp+/strUwMNPw==}
+    engines: {node: '>=18.18'}
+    hasBin: true
+    peerDependencies:
+      typescript: '>=5.1.0'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
 
   process-nextick-args@2.0.1:
     resolution: {integrity: sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==}
@@ -1049,43 +1099,73 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.0
 
-  '@lancedb/lancedb-darwin-arm64@0.20.1-beta.2':
+  '@lancedb/lancedb-darwin-arm64@0.21.0':
     optional: true
 
-  '@lancedb/lancedb-darwin-x64@0.20.1-beta.2':
+  '@lancedb/lancedb-darwin-x64@0.21.0':
     optional: true
 
-  '@lancedb/lancedb-linux-arm64-gnu@0.20.1-beta.2':
+  '@lancedb/lancedb-linux-arm64-gnu@0.21.0':
     optional: true
 
-  '@lancedb/lancedb-linux-arm64-musl@0.20.1-beta.2':
+  '@lancedb/lancedb-linux-arm64-musl@0.21.0':
     optional: true
 
-  '@lancedb/lancedb-linux-x64-gnu@0.20.1-beta.2':
+  '@lancedb/lancedb-linux-x64-gnu@0.21.0':
     optional: true
 
-  '@lancedb/lancedb-linux-x64-musl@0.20.1-beta.2':
+  '@lancedb/lancedb-linux-x64-musl@0.21.0':
     optional: true
 
-  '@lancedb/lancedb-win32-arm64-msvc@0.20.1-beta.2':
+  '@lancedb/lancedb-win32-arm64-msvc@0.21.0':
     optional: true
 
-  '@lancedb/lancedb-win32-x64-msvc@0.20.1-beta.2':
+  '@lancedb/lancedb-win32-x64-msvc@0.21.0':
     optional: true
 
-  '@lancedb/lancedb@0.20.1-beta.2(apache-arrow@20.0.0)':
+  '@lancedb/lancedb@0.21.0(apache-arrow@20.0.0)':
     dependencies:
       apache-arrow: 20.0.0
       reflect-metadata: 0.2.2
     optionalDependencies:
-      '@lancedb/lancedb-darwin-arm64': 0.20.1-beta.2
-      '@lancedb/lancedb-darwin-x64': 0.20.1-beta.2
-      '@lancedb/lancedb-linux-arm64-gnu': 0.20.1-beta.2
-      '@lancedb/lancedb-linux-arm64-musl': 0.20.1-beta.2
-      '@lancedb/lancedb-linux-x64-gnu': 0.20.1-beta.2
-      '@lancedb/lancedb-linux-x64-musl': 0.20.1-beta.2
-      '@lancedb/lancedb-win32-arm64-msvc': 0.20.1-beta.2
-      '@lancedb/lancedb-win32-x64-msvc': 0.20.1-beta.2
+      '@lancedb/lancedb-darwin-arm64': 0.21.0
+      '@lancedb/lancedb-darwin-x64': 0.21.0
+      '@lancedb/lancedb-linux-arm64-gnu': 0.21.0
+      '@lancedb/lancedb-linux-arm64-musl': 0.21.0
+      '@lancedb/lancedb-linux-x64-gnu': 0.21.0
+      '@lancedb/lancedb-linux-x64-musl': 0.21.0
+      '@lancedb/lancedb-win32-arm64-msvc': 0.21.0
+      '@lancedb/lancedb-win32-x64-msvc': 0.21.0
+
+  '@prisma/client@6.10.1(prisma@6.10.1(typescript@5.8.3))(typescript@5.8.3)':
+    optionalDependencies:
+      prisma: 6.10.1(typescript@5.8.3)
+      typescript: 5.8.3
+
+  '@prisma/config@6.10.1':
+    dependencies:
+      jiti: 2.4.2
+
+  '@prisma/debug@6.10.1': {}
+
+  '@prisma/engines-version@6.10.1-1.9b628578b3b7cae625e8c927178f15a170e74a9c': {}
+
+  '@prisma/engines@6.10.1':
+    dependencies:
+      '@prisma/debug': 6.10.1
+      '@prisma/engines-version': 6.10.1-1.9b628578b3b7cae625e8c927178f15a170e74a9c
+      '@prisma/fetch-engine': 6.10.1
+      '@prisma/get-platform': 6.10.1
+
+  '@prisma/fetch-engine@6.10.1':
+    dependencies:
+      '@prisma/debug': 6.10.1
+      '@prisma/engines-version': 6.10.1-1.9b628578b3b7cae625e8c927178f15a170e74a9c
+      '@prisma/get-platform': 6.10.1
+
+  '@prisma/get-platform@6.10.1':
+    dependencies:
+      '@prisma/debug': 6.10.1
 
   '@socket.io/component-emitter@3.1.2': {}
 
@@ -1674,6 +1754,8 @@ snapshots:
 
   is-promise@4.0.0: {}
 
+  jiti@2.4.2: {}
+
   js-sdsl@4.3.0: {}
 
   jsbn@1.1.0: {}
@@ -1809,6 +1891,13 @@ snapshots:
   parseurl@1.3.3: {}
 
   path-to-regexp@8.2.0: {}
+
+  prisma@6.10.1(typescript@5.8.3):
+    dependencies:
+      '@prisma/config': 6.10.1
+      '@prisma/engines': 6.10.1
+    optionalDependencies:
+      typescript: 5.8.3
 
   process-nextick-args@2.0.1: {}
 
