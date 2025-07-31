@@ -1,7 +1,7 @@
 import ollama, { Message } from "ollama";
 import { googleSearch } from "./search";
 import { scrape } from "./scraper";
-import messanger, { topic_parser, publish, publishTool, payload_parser } from "./messanger";
+import messanger, { topic_parser, publish, payload_parser } from "./messanger";
 import { SystemMessage, ChatMessage } from "./types";
 import { MQTT_TOPIC, MODEL_NAME, MQTT_TOPIC_PREFIX } from "./config";
 // import { recall } from "./archiver";
@@ -169,50 +169,34 @@ export class Agent {
         // 中断チェック
         if (this.thinking?.signal?.aborted || this.messages.length !== context_ids.length) {
           await this.thinking.abort();
-          // アシスタントメッセージにIDを生成し、context_idsを設定
-          const new_message: ChatMessage = { 
-            id: this.generate_id(),
-            role: "assistant", 
-            content: this.assistant_reply, 
-            context_ids: context_ids,
-            speaker_id: this.speaker_id, 
-            timestamp: Date.now(),
-          };
-          // this.messages.push(new_message);
-          const display_message = {
-            timestamp: new_message.timestamp,
-            id: new_message.id,
-            context_ids: new_message.context_ids,
-          };
-          console.warn("Run aborted");
-          console.log(display_message);
           this.assistant_reply = "";
           return;
         }
         if (part.message.tool_calls) {
-          // for (const tool of part.message.tool_calls) {
-          //   const toolName = tool.function.name;
-          //   const toolArgs = tool.function.arguments;
-          //   const toolFunction = avairableFunctions[toolName];
-          //   if (toolFunction) {
-          //     const result = await toolFunction(toolArgs);
-          //     const toolMessage: ChatMessage = {
-          //       id: this.generate_id(),
-          //       role: "tool",
-          //       content: JSON.stringify(result),
-          //       speaker_id: this.speaker_id,
-          //       timestamp: Date.now(),
-          //       context_ids: this.messages.map(msg => msg.id || '').filter(id => id !== '').reverse(),
-          //     };
-          //     this.messages.push(part.message);
-          //     this.messages.push(toolMessage);
-          //     // context_idsを含めて安全にJSONシリアライゼーション
-          //     messanger.publish(
-          //       this.topic.replace("assistant", "tool"), 
-          //       JSON.stringify(toolMessage),
-          //     );
-          //   }
-          // }
+          for (const tool of part.message.tool_calls) {
+            const toolName = tool.function.name;
+            const toolArgs = tool.function.arguments;
+            const toolFunction = avairableFunctions[toolName];
+            if (toolFunction) {
+              // TODO: PublishToolを使う
+              const result = await toolFunction(toolArgs);
+              const toolMessage: ChatMessage = {
+                id: this.generate_id(),
+                role: "tool",
+                content: JSON.stringify(result),
+                speaker_id: this.speaker_id,
+                timestamp: Date.now(),
+                context_ids: context_ids,
+              };
+              this.messages.push(part.message);
+              this.messages.push(toolMessage);
+              // context_idsを含めて安全にJSONシリアライゼーション
+              messanger.publish(
+                this.topic.replace("assistant", "tool"), 
+                JSON.stringify(toolMessage),
+              );
+            }
+          }
           return await this.run();
         } else if (part.message.content) {
           process.stdout.write(part.message.content);
@@ -252,11 +236,11 @@ export class Agent {
       }
     } catch (error) {
       // 中断された場合はnullを返す
-      if (this.shouldAbort || this.thinking?.signal?.aborted) {
-        console.log("Run aborted due to error");
-        return;
-      }
-      throw error;
+      console.log("Thinking Abort");
+      // if (this.shouldAbort || this.thinking?.signal?.aborted) {
+      //   return;
+      // }
+      // throw error;
     }
   }
 

@@ -13,3 +13,11 @@
 - https://zenn.dev/kun432/scraps/ff26833a2f9498
 - https://qiita.com/ekzemplaro/items/77bfa6274cbddd4b5624
 
+
+# Set up
+# Build
+# Start up
+``` bash
+cd path/to/repo/
+npx ts-node src/index.ts -m agent
+```

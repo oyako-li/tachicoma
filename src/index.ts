@@ -9,7 +9,7 @@ import fs from "fs";
 import { ChatMessage } from "./types";
 import { Archive } from "./archiver";
 import { message_schema, agent_master_schema } from "./schema";
-import { client, topic_parser, payload_parser } from "./messanger";
+import { client, topic_parser, payload_parser, publishTool } from "./messanger";
 import { SystemMessage, ArchiveMessage } from "./types";
 import { io, server } from "./server";
 
@@ -48,6 +48,7 @@ switch (mode) {
       pageSearchTool,
       pageScrapeTool,
       // recallTool,
+      publishTool,
     ]);
     agent.listen(topics_agent);
     process.on("SIGINT", async () => {
